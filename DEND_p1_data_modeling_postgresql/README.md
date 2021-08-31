@@ -44,4 +44,5 @@ python3 etl.py
 ```
 
   On the terminal, you should see print outs of the files being processed as they are found and processed. At the end of the script running, the last of the files will be processed and it will look like this.
+  
   ![a screenshot of the end of the commands running in the terminal](terminal_complete.png)
