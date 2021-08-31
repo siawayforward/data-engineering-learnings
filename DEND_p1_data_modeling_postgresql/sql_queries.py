@@ -12,12 +12,12 @@ time_table_drop = drop_table + "time;"
 create_table = "CREATE TABLE IF NOT EXISTS "
 
 songplay_table_create = (create_table + """songplay (
-        songplay_id int PRIMARY KEY, 
-        start_time timestamp, 
-        user_id int, 
+        songplay_id SERIAL PRIMARY KEY, 
+        start_time timestamp NOT NULL, 
+        user_id int NOT NULL, 
         level varchar, 
-        song_id int, 
-        artist_id int, 
+        song_id varchar, 
+        artist_id varchar, 
         session_id int, 
         location varchar, 
         user_agent varchar
@@ -65,34 +65,43 @@ time_table_create = (create_table + """time (
 # INSERT RECORDS
 
 songplay_table_insert = ("""
-    INSERT INTO songplay (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
-    VALUES ();
+    INSERT INTO songplay (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
 """)
 
 user_table_insert = ("""
     INSERT INTO users (user_id, first_name, last_name, gender, level)
     VALUES (%s, %s, %s, %s, %s)
+    ON CONFLICT (user_id) 
+    DO UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, gender = EXCLUDED.gender, level = EXCLUDED.level;
 """)
 
 song_table_insert = ("""
     INSERT INTO songs (song_id, title, artist_id, year, duration)
     VALUES (%s, %s, %s, %s, %s) 
+    ON CONFLICT (song_id) 
+    DO UPDATE SET title = EXCLUDED.title, artist_id = EXCLUDED.artist_id, year = EXCLUDED.year, duration = EXCLUDED.duration;
 """)
 
 artist_table_insert = ("""
     INSERT INTO artists (artist_id, name, location)
     VALUES (%s, %s, %s)
+    ON CONFLICT (artist_id) DO UPDATE SET name = EXCLUDED.name, location = EXCLUDED.location;
 """)
 
 
 time_table_insert = ("""
     INSERT INTO time (start_time, hour, day, week, month, year, weekday)
-    VALUES ();
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    ON CONFLICT (start_time) DO NOTHING;
 """)
 
 # FIND SONGS
 song_select = ("""
-    SELECT count(*) FROM songs;
+    SELECT song_id, artists.artist_id 
+    FROM songs
+    LEFT JOIN artists ON songs.artist_id = artists.artist_id
+    WHERE songs.title = %s AND artists.name = %s AND songs.duration = %s;
 """)
 
 # QUERY LISTS
